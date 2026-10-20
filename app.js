@@ -1,28 +1,54 @@
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
-const products=[
- {code:'SOFA-MOD-01',name:'模块沙发组合',version:'米白 / 左贵妃',warehouse:'深圳一仓',pieces:3,sets:126,volume:0.86,icon:'沙'},
- {code:'TABLE-DIN-02',name:'岩板餐桌',version:'1.6m / 浅灰',warehouse:'佛山仓',pieces:2,sets:126,volume:0.34,icon:'桌'},
- {code:'CHAIR-LN-03',name:'餐椅',version:'胡桃木 / 米色',warehouse:'佛山仓',pieces:4,sets:126,volume:0.12,icon:'椅'},
- {code:'STOOL-RD-01',name:'圆形脚凳',version:'米白 / 标准版',warehouse:'深圳一仓',pieces:1,sets:126,volume:0.08,icon:'凳'}
+
+let cargos=[
+ {name:'三人位沙发主体箱',sku:'SOFA-301-A',l:1980,w:820,h:610,qty:18,kg:65,rotate:true,stack:false,icon:'沙'},
+ {name:'贵妃位沙发主体箱',sku:'SOFA-301-B',l:1640,w:920,h:620,qty:18,kg:58,rotate:true,stack:false,icon:'妃'},
+ {name:'1.6m 岩板餐桌',sku:'TABLE-160-G',l:1680,w:920,h:180,qty:18,kg:52,rotate:true,stack:true,icon:'桌'},
+ {name:'餐椅双装箱',sku:'CHAIR-LN-02',l:650,w:520,h:900,qty:54,kg:24,rotate:true,stack:true,icon:'椅'},
+ {name:'圆形脚凳',sku:'STOOL-RD-01',l:660,w:660,h:450,qty:54,kg:12,rotate:true,stack:true,icon:'凳'},
+ {name:'茶几面板箱',sku:'TABLE-COF-01',l:1260,w:720,h:190,qty:24,kg:31,rotate:true,stack:true,icon:'几'}
 ];
-function renderMix(){const rows=products.flatMap((p,i)=>[p,...(i<4?[{...p,version:i%2?'深灰 / 标准版':'暖灰 / 右贵妃',warehouse:i%2?'宁波仓':'深圳二仓',code:p.code+'-V'}]:[])]).slice(0,8);$('#mixTable').innerHTML=rows.map((p,i)=>`<tr><td><div class="product-cell"><span class="product-icon">${p.icon}</span><div><b>${p.name}</b><small>${p.code}</small></div></div></td><td>${p.version}</td><td>${p.warehouse}</td><td>${p.pieces}</td><td><input class="qty-input" type="number" value="${p.sets}" min="0"></td><td>${p.volume.toFixed(2)} m³</td><td><button class="remove-row" data-row="${i}">×</button></td></tr>`).join('');$$('.remove-row').forEach(b=>b.onclick=()=>{b.closest('tr').remove();showToast('已从本次混装清单移除')})}
-renderMix();
-function showToast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.classList.remove('show'),2400)}
-$$('.nav-item').forEach(b=>b.onclick=()=>showView(b.dataset.view));$$('[data-go]').forEach(b=>b.onclick=()=>showView(b.dataset.go));
+
+function renderRows(){
+  $('#cargoRows').innerHTML=cargos.map((c,i)=>`<tr data-i="${i}"><td><div class="product-name"><i>${c.icon}</i><div><b>${c.name}</b><small>${c.sku}</small></div></div></td><td><input class="data-input dim" data-k="l" type="number" value="${c.l}"></td><td><input class="data-input dim" data-k="w" type="number" value="${c.w}"></td><td><input class="data-input dim" data-k="h" type="number" value="${c.h}"></td><td><input class="data-input dim" data-k="qty" type="number" value="${c.qty}"></td><td><input class="data-input dim" data-k="kg" type="number" value="${c.kg}"></td><td><span class="switch ${c.rotate?'on':''}" data-k="rotate"></span></td><td><span class="switch ${c.stack?'on':''}" data-k="stack"></span></td><td><button class="remove">×</button></td></tr>`).join('');
+  $$('.dim').forEach(el=>el.onchange=()=>{const i=+el.closest('tr').dataset.i;cargos[i][el.dataset.k]=+el.value;updateTotals()});
+  $$('.switch').forEach(el=>el.onclick=()=>{const i=+el.closest('tr').dataset.i,k=el.dataset.k;cargos[i][k]=!cargos[i][k];el.classList.toggle('on',cargos[i][k])});
+  $$('.remove').forEach(el=>el.onclick=()=>{cargos.splice(+el.closest('tr').dataset.i,1);renderRows();updateTotals();showToast('已从本次订单移除该产品')});
+}
+
+function updateTotals(){
+  const qty=cargos.reduce((s,c)=>s+c.qty,0),weight=cargos.reduce((s,c)=>s+c.qty*c.kg,0)/1000;
+  const rawVolume=cargos.reduce((s,c)=>s+c.l*c.w*c.h*c.qty/1e9,0);
+  $('#skuCount').textContent=cargos.length;$('#packageCount').textContent=qty;$('#totalVolume').textContent=rawVolume.toFixed(1)+' m³';$('#totalWeight').textContent=weight.toFixed(1)+' t';
+}
+renderRows();updateTotals();
+
+function showToast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.classList.remove('show'),2500)}
 function showView(id){$$('.nav-item').forEach(x=>x.classList.toggle('active',x.dataset.view===id));$$('.view').forEach(x=>x.classList.toggle('active',x.id===id));window.scrollTo({top:0,behavior:'smooth'})}
+$$('.nav-item').forEach(b=>b.onclick=()=>showView(b.dataset.view));
 $('#noticeClose').onclick=()=>$('.notice').remove();
-$$('#containerTypes button').forEach(b=>b.onclick=()=>{ $$('#containerTypes button').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');const type=b.dataset.type,vol=b.dataset.volume;$('#metricContainer').textContent=type;$('#metricContainer').nextElementSibling.textContent=vol+' m³';$('#sceneContainer').textContent=type;const u={"20GP":87.4,"40GP":90.2,"40HQ":91.8,"45HQ":88.9}[type];$('#metricUtil').textContent=u+'%';$('#utilText').textContent=u+'%';$('#utilBar').style.width=u+'%';showToast('已切换为 '+type+'，结果仍为演示估算')});
-$$('#objective button').forEach(b=>b.onclick=()=>{$$('#objective button').forEach(x=>x.classList.remove('active'));b.classList.add('active')});
-let angle=-7;function setAngle(){ $('.container-box').style.transform=`rotateX(4deg) rotateY(${angle}deg) skewY(-1deg)`}$('#rotateLeft').onclick=()=>{angle-=7;setAngle()};$('#rotateRight').onclick=()=>{angle+=7;setAngle()};$('#resetView').onclick=()=>{angle=-7;setAngle()};
-$('#playSteps').onclick=()=>{let i=0;const items=$$('#steps li');const timer=setInterval(()=>{items.forEach((x,j)=>x.classList.toggle('active',j===i));i++;if(i>=items.length){clearInterval(timer);showToast('装柜指导演示播放完毕')}},750)};
-$('#saveBtn').onclick=()=>showToast('草稿已保存在当前浏览器（演示）');$('#addSkuBtn').onclick=()=>showToast('原型提示：可从 SKU 库添加更多产品');$('#newCoreBtn').onclick=()=>showToast('新建核心 SKU 表单将在正式版中开放');
-$('#runBtn').onclick=()=>{const m=$('#optModal'),bar=$('#modalBar'),txt=$('#optText');m.classList.add('show');bar.style.width='5%';const steps=[['校验 BOM 成套关系…','28%'],['组合多 SKU 装载队列…','58%'],['模拟三维空间与重心…','82%'],['生成装柜顺序与报告…','100%']];let i=0;const timer=setInterval(()=>{txt.textContent=steps[i][0];bar.style.width=steps[i][1];i++;if(i===steps.length){clearInterval(timer);setTimeout(()=>{m.classList.remove('show');showToast('演示方案已生成：利用率 91.8%（非真实计算）')},700)}},600)};
-const tree=[['模块沙发组合','SOFA-MOD-01','米白左贵妃 · 暖灰右贵妃'],['岩板餐桌','TABLE-DIN-02','1.6m 浅灰 · 1.8m 深灰'],['餐椅','CHAIR-LN-03','胡桃木米色 · 黑橡木深灰'],['圆形脚凳','STOOL-RD-01','米白 · 深灰']];$('#skuTree').innerHTML=tree.map((x,i)=>`<div class="tree-item ${i===0?'active':''}" data-i="${i}"><b>${x[0]}</b><small>${x[1]}</small><div class="tree-children"><span>◇ ${x[2].split(' · ')[0]}</span><span>◇ ${x[2].split(' · ')[1]}</span></div></div>`).join('');$$('.tree-item').forEach((b)=>b.onclick=()=>{$$('.tree-item').forEach(x=>x.classList.remove('active'));b.classList.add('active');const x=tree[b.dataset.i];$('#detailName').textContent=x[0];$('#detailCode').textContent='核心 SKU · '+x[1]});
-const fileInput=$('#fileInput'),drop=$('#dropZone');$('#chooseFile').onclick=()=>fileInput.click();fileInput.onchange=()=>handleFile(fileInput.files[0]);['dragenter','dragover'].forEach(e=>drop.addEventListener(e,x=>{x.preventDefault();drop.classList.add('drag')}));['dragleave','drop'].forEach(e=>drop.addEventListener(e,x=>{x.preventDefault();drop.classList.remove('drag')}));drop.addEventListener('drop',e=>handleFile(e.dataTransfer.files[0]));
-function handleFile(f){if(!f)return;$('#fileName').textContent=f.name;$('#fileMeta').textContent=`${(f.size/1024).toFixed(1)} KB · 原型已接收，模拟校验通过：8 个 SKU / 12 条 BOM`;showToast('文件已读取；当前不会写入真实数据库')}
-$('#mockImport').onclick=()=>{ $('#fileName').textContent='柜算_SKU_BOM_示例.xlsx';$('#fileMeta').textContent='42.8 KB · 模拟校验通过：8 个 SKU / 12 条 BOM';showToast('已载入示例文件（演示数据）')};
-function download(name,content,type='text/csv;charset=utf-8'){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+content],{type}));a.download=name;a.click();URL.revokeObjectURL(a.href)}
-$('#templateBtn').onclick=()=>download('柜算_导入模板.csv','核心SKU,版本SKU,仓库SKU,产品名称,包装名称,长mm,宽mm,高mm,毛重kg,单套数量,仓库\nSOFA-MOD-01,SOFA-MOD-01-A,WH-SZ-001A,模块沙发组合,三人位主体箱,1980,820,610,65,1,深圳一仓');
-$('#excelReport').onclick=()=>download('柜算_装柜报告_演示.csv','字段,结果\n方案编号,GS-20261020-01\n数据性质,演示模拟（非真实优化）\n柜型,40HQ\n建议套数,126\n空间利用率,91.8%\n总体积m³,70.1\n载重t,21.6');
+$('#saveBtn').onclick=()=>showToast('项目草稿已保存在当前浏览器（演示）');
+
+$$('.segmented').forEach(group=>$$('button',group).forEach(b=>b.onclick=()=>{$$('button',group).forEach(x=>x.classList.remove('active'));b.classList.add('active')}));
+
+$('#addProduct').onclick=()=>{cargos.push({name:'新产品包装箱',sku:'NEW-SKU-'+String(cargos.length+1).padStart(2,'0'),l:1000,w:600,h:500,qty:1,kg:20,rotate:true,stack:true,icon:'新'});renderRows();updateTotals();showToast('已添加一行，请填写实际外包装尺寸')};
+$('#importBtn').onclick=()=>$('#fileInput').click();
+$('#fileInput').onchange=()=>{const f=$('#fileInput').files[0];if(!f)return;$('#fileState').textContent='已读取 '+f.name;showToast('原型已接收文件；正式版将解析 Excel 并校验尺寸字段')};
+
+function download(name,content){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+content],{type:'text/csv;charset=utf-8'}));a.download=name;a.click();URL.revokeObjectURL(a.href)}
+$('#templateBtn').onclick=()=>download('柜算_产品尺寸导入模板.csv','订单号,SKU,产品名称,包装长mm,包装宽mm,包装高mm,数量,单件毛重kg,允许旋转,可堆叠,易碎品\nPO-2026-1020-A,SOFA-301-A,三人位沙发主体箱,1980,820,610,24,65,是,否,否');
+
+let angle=-7;function updateAngle(){ $('#container3d').style.transform=`rotateX(4deg) rotateY(${angle}deg)` }$('#rotateLeft').onclick=()=>{angle-=8;updateAngle()};$('#rotateRight').onclick=()=>{angle+=8;updateAngle()};
+
+function runOptimization(){
+  const modal=$('#optModal'),bar=$('#modalProgress'),txt=$('#optText');modal.classList.add('show');bar.style.width='4%';
+  const phases=[['检查产品尺寸、数量与重量…','23%'],['尝试 20GP / 40GP / 40HQ / 45HQ…','48%'],['计算旋转、堆叠与重心约束…','73%'],['生成最高利用率方案与装柜顺序…','100%']];let i=0;
+  const timer=setInterval(()=>{txt.textContent=phases[i][0];bar.style.width=phases[i][1];i++;if(i===phases.length){clearInterval(timer);setTimeout(()=>{modal.classList.remove('show');$('#recommendedType').textContent='40HQ × 1';$('#utilization').textContent='92.6%';$('#meterValue').textContent='92.6%';$('#meterBar').style.width='92.6%';showToast('演示方案已生成：推荐 40HQ × 1，利用率 92.6%')},650)}},600)
+}
+$('#runBtn').onclick=runOptimization;$('#topOptimize').onclick=runOptimization;
+
+$('#playBtn').onclick=()=>{let i=0,items=$$('#steps li');const timer=setInterval(()=>{items.forEach((x,j)=>x.classList.toggle('active',j===i));i++;if(i>=items.length){clearInterval(timer);showToast('装柜顺序演示播放完成')}},800)};
+$$('.alternatives button').forEach(b=>b.onclick=()=>{$$('.alternatives button').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');showToast('已切换柜型对比；右上角推荐仍为最优方案')});
+$('#excelReport').onclick=()=>download('柜算_排柜结果_演示.csv','字段,结果\n方案编号,GS-20261020-01\n订单号,PO-2026-1020-A\n数据性质,演示计算（非真实装箱结果）\n推荐柜型,40HQ × 1\n空间利用率,92.6%\n包装件数,186\n总重,5.8t');
 $('#pdfReport').onclick=()=>{showToast('正在打开打印视图，可选择“另存为 PDF”');setTimeout(()=>window.print(),350)};
 
