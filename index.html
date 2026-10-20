@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="柜算：面向外贸家具与大件产品的智能排柜原型" />
+  <title>柜算｜智能排柜</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">柜</span><div><strong>柜算</strong><small>智能排柜</small></div></div>
+      <div class="demo-chip"><i></i> 演示工作区</div>
+      <nav id="nav">
+        <button class="nav-item active" data-view="dashboard"><span>▦</span> 排柜工作台</button>
+        <button class="nav-item" data-view="sku"><span>◇</span> SKU 与 BOM</button>
+        <button class="nav-item" data-view="import"><span>⇧</span> Excel 批量导入</button>
+        <button class="nav-item" data-view="plans"><span>▤</span> 历史方案</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="status-card"><span class="status-icon">!</span><div><b>计算引擎状态</b><p>当前使用演示模拟结果</p></div></div>
+        <button class="help-btn">? &nbsp; 产品说明</button>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div><p class="eyebrow">排柜工作台 / 新建方案</p><h1>华东客户 · 客厅家具混装</h1></div>
+        <div class="top-actions"><button class="btn secondary" id="saveBtn">保存草稿</button><button class="btn primary" id="runBtn">▶ 开始优化</button><div class="avatar">林</div></div>
+      </header>
+
+      <div class="notice"><span class="notice-icon">i</span><div><b>这是交互原型</b><span>页面中的利用率、套数与装载顺序均为演示算法生成，不代表真实物理优化结果。</span></div><button id="noticeClose">知道了</button></div>
+
+      <section class="view active" id="dashboard">
+        <div class="metrics">
+          <div class="metric"><span class="metric-icon blue">▣</span><div><small>目标柜型</small><strong id="metricContainer">40HQ</strong><em>76.4 m³</em></div></div>
+          <div class="metric"><span class="metric-icon cyan">◇</span><div><small>混装 SKU</small><strong>8</strong><em>4 个产品系列</em></div></div>
+          <div class="metric"><span class="metric-icon green">↗</span><div><small>空间利用率</small><strong id="metricUtil">91.8%</strong><em class="positive">演示估算 +4.2%</em></div></div>
+          <div class="metric"><span class="metric-icon violet">✓</span><div><small>完整套数</small><strong id="metricSets">126</strong><em>2 套余量</em></div></div>
+        </div>
+
+        <div class="layout-grid">
+          <div class="left-stack">
+            <article class="panel setup-panel">
+              <div class="panel-head"><div><h2>01 &nbsp;装柜参数</h2><p>选择柜型并设置本次优化目标</p></div><span class="tag real-input">真实输入</span></div>
+              <div class="container-types" id="containerTypes">
+                <button data-type="20GP" data-volume="33.2"><b>20GP</b><span>33.2 m³</span></button>
+                <button data-type="40GP" data-volume="67.7"><b>40GP</b><span>67.7 m³</span></button>
+                <button class="selected" data-type="40HQ" data-volume="76.4"><b>40HQ</b><span>76.4 m³</span></button>
+                <button data-type="45HQ" data-volume="86.0"><b>45HQ</b><span>86.0 m³</span></button>
+              </div>
+              <div class="objective-row"><label>优化目标</label><div class="segmented" id="objective"><button class="active">套数优先</button><button>利用率优先</button><button>均衡装载</button></div></div>
+              <div class="constraints"><label><input type="checkbox" checked /> 保持 BOM 成套</label><label><input type="checkbox" checked /> 优先同仓发货</label><label><input type="checkbox" /> 允许侧放</label></div>
+            </article>
+
+            <article class="panel sku-panel">
+              <div class="panel-head"><div><h2>02 &nbsp;混装清单</h2><p>核心 SKU、版本 SKU 与仓库库存关系</p></div><div class="head-actions"><button class="text-btn" data-go="sku">管理 SKU</button><button class="small-btn" id="addSkuBtn">＋ 添加</button></div></div>
+              <div class="table-wrap"><table><thead><tr><th>核心 SKU / 产品</th><th>版本</th><th>仓库</th><th>单套件数</th><th>需求套数</th><th>体积</th><th></th></tr></thead><tbody id="mixTable"></tbody></table></div>
+              <div class="table-footer"><span>8 个 SKU · 预计总体积 <b>69.8 m³</b></span><span class="legend"><i class="dot core"></i>核心 <i class="dot version"></i>版本 <i class="dot warehouse"></i>仓库</span></div>
+            </article>
+          </div>
+
+          <article class="panel visual-panel">
+            <div class="panel-head"><div><h2>03 &nbsp;3D 装柜预览</h2><p>按装柜顺序分层展示</p></div><span class="tag demo-tag">演示渲染</span></div>
+            <div class="visual-toolbar"><div class="segmented tiny"><button class="active">3D</button><button>俯视</button><button>侧视</button></div><div><button class="icon-btn" id="rotateLeft">↶</button><button class="icon-btn" id="resetView">⌂</button><button class="icon-btn" id="rotateRight">↷</button></div></div>
+            <div class="container-scene" id="scene">
+              <div class="container-box">
+                <div class="cargo c1" style="--x:3%;--y:48%;--w:19%;--h:33%"><span>01</span></div>
+                <div class="cargo c2" style="--x:20%;--y:49%;--w:18%;--h:32%"><span>02</span></div>
+                <div class="cargo c3" style="--x:36%;--y:28%;--w:19%;--h:53%"><span>03</span></div>
+                <div class="cargo c4" style="--x:53%;--y:43%;--w:20%;--h:38%"><span>04</span></div>
+                <div class="cargo c1" style="--x:70%;--y:31%;--w:17%;--h:50%"><span>05</span></div>
+                <div class="cargo c5" style="--x:84%;--y:54%;--w:13%;--h:27%"><span>06</span></div>
+              </div>
+              <div class="scene-label"><b id="sceneContainer">40HQ</b><span>12,032 × 2,350 × 2,698 mm</span></div>
+            </div>
+            <div class="util-block"><div class="util-head"><span>空间利用率</span><b id="utilText">91.8%</b></div><div class="progress"><i id="utilBar" style="width:91.8%"></i></div><div class="util-scale"><span>已装 70.1 m³</span><span>可用 76.4 m³</span></div></div>
+            <div class="sequence">
+              <div class="sequence-head"><h3>装柜顺序</h3><span>共 6 个步骤</span></div>
+              <ol id="steps">
+                <li class="active"><span>01</span><div><b>沙发主体 · A 区</b><small>贴左侧柜壁，重件打底</small></div><em>12 件</em></li>
+                <li><span>02</span><div><b>餐桌面板 · B 区</b><small>竖放并加护角</small></div><em>24 件</em></li>
+                <li><span>03</span><div><b>椅箱与脚凳 · 中区</b><small>交错堆叠，填充间隙</small></div><em>42 件</em></li>
+              </ol>
+              <button class="full-btn" id="playSteps">播放装柜指导 →</button>
+            </div>
+          </article>
+        </div>
+
+        <article class="panel result-panel">
+          <div class="panel-head"><div><h2>优化结果摘要</h2><p>方案 GS-20261020-01 · 刚刚生成</p></div><div class="head-actions"><button class="btn secondary" id="excelReport">导出 Excel</button><button class="btn primary" id="pdfReport">导出 PDF</button></div></div>
+          <div class="result-grid"><div><small>建议装载</small><b>126 套</b><span>共 312 件包装</span></div><div><small>载重</small><b>21.6 t</b><span>限重 26.0 t</span></div><div><small>剩余空间</small><b>6.3 m³</b><span>可加装约 8.2%</span></div><div class="warning-result"><small>装载提醒</small><b>2 项</b><span>查看重心与易碎件建议</span></div></div>
+        </article>
+      </section>
+
+      <section class="view" id="sku">
+        <div class="page-title"><div><h2>SKU 与 BOM 关系管理</h2><p>以核心 SKU 为主线，统一管理版本、仓库映射和成套规则。</p></div><button class="btn primary" id="newCoreBtn">＋ 新建核心 SKU</button></div>
+        <div class="sku-layout">
+          <article class="panel tree-panel"><div class="panel-head"><div><h2>产品结构</h2><p>4 个核心产品 · 8 个版本</p></div><span class="tag real-input">真实输入</span></div><div id="skuTree"></div></article>
+          <article class="panel detail-panel"><div class="panel-head"><div><h2 id="detailName">模块沙发组合</h2><p id="detailCode">核心 SKU · SOFA-MOD-01</p></div><button class="small-btn">编辑资料</button></div><div class="detail-cards"><div><small>包装件数</small><b>3 件 / 套</b></div><div><small>总体积</small><b>0.86 m³</b></div><div><small>毛重</small><b>112 kg</b></div></div><h3>BOM 组成</h3><table><thead><tr><th>仓库 SKU</th><th>包装名称</th><th>规格 mm</th><th>数量</th><th>可用库存</th></tr></thead><tbody><tr><td>WH-SZ-001A</td><td>三人位主体箱</td><td>1980×820×610</td><td>1</td><td><span class="stock ok">158</span></td></tr><tr><td>WH-SZ-001B</td><td>贵妃位主体箱</td><td>1640×920×620</td><td>1</td><td><span class="stock ok">141</span></td></tr><tr><td>WH-SZ-001C</td><td>扶手 / 五金箱</td><td>760×420×280</td><td>1</td><td><span class="stock low">132</span></td></tr></tbody></table><div class="bom-note"><b>成套约束</b><span>任一组件不足时，不计入完整套数；以最低库存 132 套为上限。</span></div></article>
+        </div>
+      </section>
+
+      <section class="view" id="import">
+        <div class="page-title"><div><h2>Excel 批量导入</h2><p>批量导入核心 SKU、版本 SKU、仓库 SKU 与 BOM 关系。</p></div><button class="btn secondary" id="templateBtn">下载导入模板</button></div>
+        <article class="panel import-panel"><span class="tag demo-tag floating">原型解析</span><div class="upload-zone" id="dropZone"><div class="upload-icon">⇧</div><h3>拖放 Excel 文件到这里</h3><p>支持 .xlsx、.xls、.csv，单个文件不超过 20 MB</p><button class="btn primary" id="chooseFile">选择文件</button><input type="file" id="fileInput" accept=".xlsx,.xls,.csv" hidden /></div><div class="import-rules"><div><span>1</span><p><b>下载标准模板</b><small>按照字段说明填写 SKU 和 BOM</small></p></div><i>→</i><div><span>2</span><p><b>上传并检查</b><small>预览字段映射与错误提示</small></p></div><i>→</i><div><span>3</span><p><b>确认写入</b><small>原型仅模拟，不保存真实数据</small></p></div></div><div class="file-preview" id="filePreview"><span>✓</span><div><b id="fileName">未选择文件</b><small id="fileMeta">上传后将在此显示校验结果</small></div><button class="small-btn" id="mockImport">使用示例文件</button></div></article>
+      </section>
+
+      <section class="view" id="plans">
+        <div class="page-title"><div><h2>历史方案</h2><p>集中查看、复制和导出已保存的装柜方案。</p></div><button class="btn primary">＋ 新建方案</button></div>
+        <article class="panel"><div class="table-wrap"><table class="plans-table"><thead><tr><th>方案编号</th><th>客户 / 项目</th><th>柜型</th><th>套数</th><th>利用率</th><th>状态</th><th>更新时间</th></tr></thead><tbody><tr><td><b>GS-20261020-01</b></td><td>华东客户 · 客厅家具</td><td>40HQ</td><td>126</td><td>91.8%</td><td><span class="plan-status demo">演示方案</span></td><td>今天 10:42</td></tr><tr><td><b>GS-20261018-03</b></td><td>北欧系列 · 餐厅套装</td><td>40GP</td><td>168</td><td>89.4%</td><td><span class="plan-status draft">草稿</span></td><td>10 月 18 日</td></tr><tr><td><b>GS-20261016-02</b></td><td>户外家具 · 混合柜</td><td>45HQ</td><td>94</td><td>93.1%</td><td><span class="plan-status demo">演示方案</span></td><td>10 月 16 日</td></tr></tbody></table></div></article>
+      </section>
+    </main>
+  </div>
+  <div class="toast" id="toast"></div>
+  <div class="modal" id="optModal"><div class="modal-card"><div class="loader"><i></i><i></i><i></i></div><h2>正在生成演示方案</h2><p id="optText">校验 BOM 成套关系…</p><div class="modal-progress"><i id="modalBar"></i></div><small>此过程为前端模拟，不调用真实优化引擎</small></div></div>
+  <script src="app.js"></script>
+</body>
+</html>
+
