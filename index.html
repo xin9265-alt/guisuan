@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="柜算：从外贸订单产品尺寸到自动排柜的智能装柜原型" />
   <title>柜算｜订单自动排柜</title>
-  <link rel="stylesheet" href="styles.css?v=20261020-2" />
+  <link rel="stylesheet" href="styles.css?v=20261020-3" />
 </head>
 <body>
   <div class="app-shell">
@@ -58,6 +58,7 @@
             <article class="panel cargo-panel">
               <div class="panel-head"><div><h2>02 &nbsp;待装产品</h2><p>录入完工后的外包装长、宽、高、数量和重量</p></div><div class="head-actions"><button class="btn ghost" id="templateBtn">下载模板</button><button class="btn secondary" id="importBtn">Excel 导入</button><input id="fileInput" type="file" accept=".xlsx,.xls,.csv" hidden /></div></div>
               <div class="data-tip"><b>尺寸单位：mm</b><span>请使用实际外包装尺寸，不要使用产品裸尺寸。</span><span class="file-state" id="fileState">演示数据 6 项</span></div>
+              <div class="import-summary" id="importSummary" hidden><span class="import-check">✓</span><div><b id="importTitle">导入完成</b><small id="importMeta">数据已立即显示在下方表格中</small></div><button id="dismissImport">关闭</button></div>
               <div class="table-wrap"><table><thead><tr><th>产品 / SKU</th><th>长</th><th>宽</th><th>高</th><th>数量</th><th>单件 kg</th><th>允许旋转</th><th>可堆叠</th><th></th></tr></thead><tbody id="cargoRows"></tbody></table></div>
               <div class="cargo-footer"><button class="add-row" id="addProduct">＋ 添加产品</button><div class="totals"><span>共 <b id="skuCount">6</b> 个产品</span><span><b id="packageCount">186</b> 件包装</span><span>总体积 <b id="totalVolume">70.8 m³</b></span><span>总重 <b id="totalWeight">5.8 t</b></span></div></div>
             </article>
@@ -77,7 +78,8 @@
             <article class="panel result-card">
               <div class="panel-head"><div><h2>排柜结果</h2><p>方案 GS-20261020-01</p></div><span class="tag demo">演示计算</span></div>
               <div class="recommend"><span>推荐方案</span><div><strong id="recommendedType">40HQ × 1</strong><em>预计可一次装完</em></div><b id="utilization">92.6%</b></div>
-              <div class="scene"><div class="container-3d" id="container3d"><div class="box blue" style="--x:2%;--y:45%;--w:20%;--h:36%">A1</div><div class="box cyan" style="--x:20%;--y:50%;--w:18%;--h:31%">B1</div><div class="box purple" style="--x:36%;--y:24%;--w:18%;--h:57%">C1</div><div class="box green" style="--x:52%;--y:42%;--w:19%;--h:39%">D1</div><div class="box blue" style="--x:69%;--y:31%;--w:17%;--h:50%">A2</div><div class="box orange" style="--x:83%;--y:54%;--w:14%;--h:27%">E1</div></div><div class="scene-tools"><button id="rotateLeft">↶</button><span>旋转查看 3D</span><button id="rotateRight">↷</button></div></div>
+              <div class="scene"><span class="scene-badge">3D 堆放效果</span><div class="container-3d" id="container3d"><div class="container-floor"></div><div id="cargoScene"></div><div class="door-frame"></div></div><div class="scene-tools"><button id="rotateLeft">↶</button><span>旋转查看 · 货物按 SKU 着色</span><button id="rotateRight">↷</button></div></div>
+              <div class="scene-legend" id="sceneLegend"></div>
               <div class="meter"><div><span>空间利用率</span><b id="meterValue">92.6%</b></div><div class="bar"><i id="meterBar" style="width:92.6%"></i></div><small>已装 70.8 m³ / 柜内容积 76.4 m³</small></div>
               <div class="result-stats"><div><small>包装件数</small><b>186 件</b></div><div><small>载重利用</small><b>22.5%</b></div><div><small>剩余空间</small><b>5.6 m³</b></div></div>
               <h3 class="mini-title">柜型比较</h3><div class="alternatives"><button><span>40GP</span><b>需 2 柜</b><em>利用率 48.5%</em></button><button class="selected"><span>40HQ</span><b>1 柜</b><em>利用率 92.6%</em></button><button><span>45HQ</span><b>1 柜</b><em>利用率 82.3%</em></button></div>
@@ -105,7 +107,8 @@
   </div>
   <div class="toast" id="toast"></div>
   <div class="modal" id="optModal"><div class="modal-card"><div class="loader"><i></i><i></i><i></i></div><h2>正在尝试不同柜型与摆放方式</h2><p id="optText">读取 186 件产品尺寸…</p><div class="modal-bar"><i id="modalProgress"></i></div><small>当前为交互演示，正式版将运行真实三维装箱算法</small></div></div>
-  <script src="app.js?v=20261020-2"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script src="app.js?v=20261020-3"></script>
 </body>
 </html>
 
